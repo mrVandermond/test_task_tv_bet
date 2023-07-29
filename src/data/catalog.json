@@ -1,0 +1,105 @@
+[{
+  "name": "P40",
+  "art": "123",
+  "brand": 1,
+  "price": 1500,
+  "year": 2021
+},
+{
+  "name": "P50",
+  "art": "456",
+  "brand": 1,
+  "price": 4800,
+  "year": 2021
+},
+{
+  "name": "P50 Pro",
+  "art": "789",
+  "brand": 1,
+  "price": 9000,
+  "year": 2022
+},
+{
+  "name": "Nova 8",
+  "art": "890",
+  "brand": 1,
+  "price": 699,
+  "year": 2019
+},
+{
+  "name": "Nova 9 Pro",
+  "art": "312",
+  "brand": 1,
+  "price": 1200,
+  "year": 2022
+},
+{
+  "name": "Galaxy 22",
+  "art": "725",
+  "brand": 2,
+  "price": 9999,
+  "year": 2022
+},
+{
+  "name": "Galaxy Fold",
+  "art": "246",
+  "brand": 2,
+  "price": 15999,
+  "year": 2022
+},
+{
+  "name": "Galaxy A75",
+  "art": "248",
+  "brand": 2,
+  "price": 999,
+  "year": 2021
+},
+{
+  "name": "Iphone 7",
+  "art": "964",
+  "brand": 3,
+  "price": 999,
+  "year": 2015
+},
+{
+  "name": "Iphone 8",
+  "art": "365",
+  "brand": 3,
+  "price": 2999,
+  "year": 2016
+},
+{
+  "name": "Iphone X",
+  "art": "105",
+  "brand": 3,
+  "price": 3999,
+  "year": 2021
+},
+{
+  "name": "Iphone 12",
+  "art": "943",
+  "brand": 3,
+  "price": 10999,
+  "year": 2021
+},
+{
+  "name": "Iphone 9",
+  "art": "385",
+  "brand": 3,
+  "price": 7999,
+  "year": 2020
+},
+{
+  "name": "Iphone 13 PRO MAX",
+  "art": "843",
+  "brand": 3,
+  "price": 99999,
+  "year": 2021
+},
+{
+  "name": "Iphone 14",
+  "art": "952",
+  "brand": 3,
+  "price": 999999,
+  "year": 2022
+}]
