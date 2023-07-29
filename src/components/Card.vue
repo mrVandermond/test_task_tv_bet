@@ -8,25 +8,30 @@
     <div class="card__content">
       <div>Price: {{ props.card.price }}</div>
       <div>Year: {{ props.card.year }}</div>
-      <div>*</div> <!-- TODO: Доделать -->
+      <div>Stock: {{ props.card.stockCount }}</div>
     </div>
 
     <div class="card__footer">
-      <BaseButton @click="onClickAddToCard">Add to card</BaseButton>
+      <BaseButton
+        :disabled="props.card.stockCount.value === 0"
+        @click="onClickAddToCard"
+      >Add to card</BaseButton>
     </div>
   </article>
 </template>
 
 <script setup lang="ts">
-import type { CatalogItem } from '@/store/types';
+import type { ExtendedCatalogItem } from '@/store/types';
 import BaseButton from '@/components/BaseButton.vue';
 
 const props = defineProps<{
-  card: CatalogItem;
+  card: ExtendedCatalogItem;
 }>();
 
 function onClickAddToCard() {
-  // TODO
+  if (props.card.stockCount.value === 0) return;
+
+  props.card.stockCount.value -= 1;
 }
 </script>
 

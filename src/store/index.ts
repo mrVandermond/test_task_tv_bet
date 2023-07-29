@@ -4,25 +4,26 @@ import type { ComputedRef, Ref } from 'vue';
 import initialBrands from '@/data/brands.json';
 import initialCatalog from '@/data/catalog.json';
 import initialStock from '@/data/stock.json';
-import type { BrandItem, CatalogItem, StockItem } from '@/store/types';
+import type { BrandItem, CatalogItem, ExtendedCatalogItem } from '@/store/types';
 import { COUNT_ITEM_PER_PAGE } from '@/utils/constants';
+import { convertStockToStockByArt } from '@/utils/functions';
 
 interface Store {
   brands: Ref<BrandItem[]>;
   catalog: Ref<CatalogItem[]>;
-  stock: Ref<StockItem[]>;
   page: Ref<number>;
   readonly countPages: number;
-  itemsForCurrentPage: ComputedRef<CatalogItem[]>;
+  itemsForCurrentPage: ComputedRef<ExtendedCatalogItem[]>;
+  stockByArt: Record<string, Ref<number>>;
 }
 
 export default defineStore('store', (): Store => {
-  const brands = ref<BrandItem[]>(initialBrands);
-  const catalog = ref<CatalogItem[]>(initialCatalog.map(item => ({
+  const brands = ref(initialBrands);
+  const catalog = ref(initialCatalog.map(item => ({
     ...item,
     key: Symbol('key'),
   })));
-  const stock = ref<StockItem[]>(initialStock);
+  const stockByArt = convertStockToStockByArt(initialStock);
 
 
   const page = ref(1);
@@ -34,15 +35,20 @@ export default defineStore('store', (): Store => {
     const start = (page.value - 1) * COUNT_ITEM_PER_PAGE;
     const end = page.value * COUNT_ITEM_PER_PAGE;
 
-    return catalog.value.slice(start, end);
+    return catalog.value.slice(start, end).map(item => {
+      return {
+        ...item,
+        stockCount: stockByArt[item.art],
+      }
+    });
   });
 
   return {
     brands,
     catalog,
-    stock,
     page,
     countPages,
     itemsForCurrentPage,
+    stockByArt,
   };
 });
