@@ -1,11 +1,22 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import type { ComputedRef, Ref } from 'vue';
 import initialBrands from '@/data/brands.json';
 import initialCatalog from '@/data/catalog.json';
 import initialStock from '@/data/stock.json';
 import type { BrandItem, CatalogItem, StockItem } from '@/store/types';
+import { COUNT_ITEM_PER_PAGE } from '@/utils/constants';
 
-export default defineStore('store', () => {
+interface Store {
+  brands: Ref<BrandItem[]>;
+  catalog: Ref<CatalogItem[]>;
+  stock: Ref<StockItem[]>;
+  page: Ref<number>;
+  readonly countPages: number;
+  itemsForCurrentPage: ComputedRef<CatalogItem[]>;
+}
+
+export default defineStore('store', (): Store => {
   const brands = ref<BrandItem[]>(initialBrands);
   const catalog = ref<CatalogItem[]>(initialCatalog.map(item => ({
     ...item,
@@ -13,5 +24,25 @@ export default defineStore('store', () => {
   })));
   const stock = ref<StockItem[]>(initialStock);
 
-  return { brands, catalog, stock };
+
+  const page = ref(1);
+  const countPages = catalog.value.length % COUNT_ITEM_PER_PAGE
+    ? Math.floor(catalog.value.length / COUNT_ITEM_PER_PAGE) + 1
+    : Math.floor(catalog.value.length / COUNT_ITEM_PER_PAGE);
+
+  const itemsForCurrentPage = computed(() => {
+    const start = (page.value - 1) * COUNT_ITEM_PER_PAGE;
+    const end = page.value * COUNT_ITEM_PER_PAGE;
+
+    return catalog.value.slice(start, end);
+  });
+
+  return {
+    brands,
+    catalog,
+    stock,
+    page,
+    countPages,
+    itemsForCurrentPage,
+  };
 });
