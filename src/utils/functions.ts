@@ -2,6 +2,7 @@ import type { StockItem } from '@/store/types';
 import { Stock } from '@/store/types';
 import { ref } from 'vue';
 import type { Ref } from 'vue';
+import { COUNT_ITEM_PER_PAGE } from '@/utils/constants';
 
 export function convertStockToStockByArt(stockList: StockItem[], stock?: Stock): Record<string, Ref<number>> {
   const result: Record<string, Ref<number>> = {};
@@ -21,4 +22,10 @@ export function convertStockToStockByArt(stockList: StockItem[], stock?: Stock):
   });
 
   return result;
+}
+
+export function getCountPages(numberOfElements: number, countPerPage: number): number {
+  return numberOfElements % countPerPage
+    ? Math.floor(numberOfElements / COUNT_ITEM_PER_PAGE) + 1
+    : Math.floor(numberOfElements / COUNT_ITEM_PER_PAGE);
 }

@@ -19,6 +19,7 @@ import Filter from '@/components/Filter.vue';
 
 .filter
   width: 250px
+  margin-right: 16px
 
 .page
   flex: 1 0 0
