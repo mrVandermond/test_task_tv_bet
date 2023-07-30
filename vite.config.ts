@@ -20,7 +20,5 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  build: {
-    outDir: './docs',
-  },
+  base: '/test_task_tv_bet/'
 })
