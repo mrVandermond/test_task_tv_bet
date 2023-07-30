@@ -3,7 +3,8 @@
     `group-button_${props.direction}_direction`,
     `group-button_${props.color}_color`,
     'group-button',
-    ]">
+    ]"
+  >
     <BaseButton
       v-for="button in localButtonList"
       :color="props.color"
@@ -19,7 +20,7 @@
 
 <script setup lang="ts" generic="T extends GroupButton">
 import BaseButton from '@/components/BaseButton.vue';
-import { ref, watchEffect } from 'vue';
+import { onBeforeUnmount, ref, watchEffect } from 'vue';
 import type { Ref } from 'vue';
 import type { GroupButton } from '@/components/BaseGroupButton/types';
 
@@ -42,7 +43,7 @@ const emits = defineEmits<{
 
 const localButtonList = ref(props.buttonList) as Ref<T[]>;
 
-watchEffect(() => {
+const stopWatch = watchEffect(() => {
   localButtonList.value = props.buttonList;
 });
 
@@ -55,6 +56,10 @@ function onClickButton(button: T): void {
   }));
   emits('click', { ...button, active: !button.active });
 }
+
+onBeforeUnmount(() => {
+  stopWatch();
+});
 </script>
 
 <style scoped lang="sass">
