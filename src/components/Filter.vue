@@ -38,22 +38,18 @@
 
 <script setup lang="ts">
 import useStore from '@/store';
-import BaseGroupButton from '@/components/BaseGroupButton.vue';
+import BaseGroupButton from '@/components/BaseGroupButton/BaseGroupButton.vue';
 import type { BrandItem } from '@/store/types';
 import { ref } from 'vue';
 import { Stock } from '@/store/types';
-
-interface GroupButton {
-  active: boolean;
-  title: string;
-  key: symbol;
-}
+import type { GroupButton } from '@/components/BaseGroupButton/types';
 
 type BrandButton = GroupButton & BrandItem;
 type YearButton = GroupButton & { year: number };
-type StockButton = GroupButton & { id: Stock };
+type StockButton = GroupButton & { stock: Stock };
 
 const store = useStore();
+
 const brands = ref(store.brands.map(item => ({
   ...item,
   title: item.name,
@@ -67,7 +63,7 @@ const yearsOfIssue = ref(store.yearsOfIssue.map(item => ({
   active: false,
 })));
 const stocks = ref(Object.values(Stock).map((item, index) => ({
-  id: item,
+  stock: item,
   title: `Store ${index + 1}`,
   key: Symbol('key'),
   active: false,
@@ -101,7 +97,7 @@ function onClickYear(button: YearButton): void {
 function onClickStock(button: StockButton): void {
   store.updateFilter({
     ...store.filter,
-    stock: button.active ? button.id : undefined,
+    stock: button.active ? button.stock : undefined,
   });
 }
 </script>

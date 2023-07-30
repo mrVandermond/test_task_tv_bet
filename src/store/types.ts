@@ -10,7 +10,7 @@ export interface CatalogItem {
 
 export interface ExtendedCatalogItem extends CatalogItem {
   readonly key: symbol;
-  stockCount: Ref<number>;
+  stockCount: Ref<StockCount>;
 }
 
 export interface BrandItem {
@@ -27,4 +27,9 @@ export interface StockItem {
 export enum Stock {
   STOCK_1 = 'st1',
   STOCK_2 = 'st2',
+}
+
+export interface StockCount {
+  [Stock.STOCK_1]: number;
+  [Stock.STOCK_2]: number;
 }

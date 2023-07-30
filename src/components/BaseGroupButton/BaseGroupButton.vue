@@ -17,10 +17,11 @@
   </div>
 </template>
 
-<script setup lang="ts" generic="T extends { key: symbol; title: string; active: boolean }">
+<script setup lang="ts" generic="T extends GroupButton">
 import BaseButton from '@/components/BaseButton.vue';
 import { ref, watchEffect } from 'vue';
 import type { Ref } from 'vue';
+import type { GroupButton } from '@/components/BaseGroupButton/types';
 
 const props = withDefaults(
   defineProps<{

@@ -1,37 +1,42 @@
 <template>
   <article class="card">
-    <div class="card__header">
+    <section class="card__header">
       <h3 class="card__subhead">{{ props.card.name }}</h3>
       <div>Art: {{ props.card.art }}</div>
-    </div>
+    </section>
 
-    <div class="card__content">
+    <section class="card__content">
       <div>Price: {{ props.card.price }}</div>
       <div>Year: {{ props.card.year }}</div>
-      <div>Stock: {{ props.card.stockCount }}</div>
-    </div>
+      <div>Stock: {{ stockCount }}</div>
+    </section>
 
-    <div class="card__footer">
-      <BaseButton
-        :disabled="props.card.stockCount.value === 0"
-        @click="onClickAddToCard"
-      >Add to card</BaseButton>
-    </div>
+    <section class="card__footer">
+      <BaseButton :disabled="stockCount === 0" @click="onClickAddToCard">Add to card</BaseButton>
+    </section>
   </article>
 </template>
 
 <script setup lang="ts">
-import type { ExtendedCatalogItem } from '@/store/types';
-import BaseButton from '@/components/BaseButton.vue';
+import type { ExtendedCatalogItem } from '@/store/types'
+import { Stock } from '@/store/types'
+import BaseButton from '@/components/BaseButton.vue'
+import { computed } from 'vue'
+import useStore from '@/store'
 
 const props = defineProps<{
-  card: ExtendedCatalogItem;
-}>();
+  card: ExtendedCatalogItem
+}>()
+const store = useStore()
+
+const stockCount = computed(() => {
+  return props.card.stockCount.value[Stock.STOCK_1] + props.card.stockCount.value[Stock.STOCK_2]
+});
 
 function onClickAddToCard() {
-  if (props.card.stockCount.value === 0) return;
+  if (stockCount.value === 0) return
 
-  props.card.stockCount.value -= 1;
+  store.addToCard(props.card.art)
 }
 </script>
 
