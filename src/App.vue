@@ -3,12 +3,18 @@
     <Filter class="filter" />
 
     <Page class="page" />
+
+    <Loader :loading="store.loading" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import Page from '@/components/Page.vue';
 import Filter from '@/components/Filter.vue';
+import Loader from '@/components/Loader.vue';
+import useStore from '@/store';
+
+const store = useStore();
 </script>
 
 <style lang="sass" scoped>

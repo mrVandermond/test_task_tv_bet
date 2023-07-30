@@ -25,6 +25,7 @@ interface Store {
   addToCard: (art: string) => void
   updateSortOrder: (sortOrder: SortOrder) => void
   updateCurrency: (currency: Currency) => Promise<void>
+  loading: Readonly<Ref<boolean>>;
 }
 
 interface Filter {
@@ -43,6 +44,7 @@ export default defineStore('store', (): Store => {
   });
   let stockByArt = convertStockToStockByArt(initialStock);
   const currentCurrency = ref(Currency.RUB);
+  const loading = ref(false);
 
   const catalog = initialCatalog.map(item => ({
     ...item,
@@ -123,16 +125,17 @@ export default defineStore('store', (): Store => {
   }
 
   async function updateCurrency(currency: Currency): Promise<void> {
-    currentCurrency.value = currency;
-
     if (currency === Currency.RUB) {
       filteredCatalog.value = filteredCatalog.value.map(item => ({
         ...item,
         convertedPrice: item.price.toFixed(2),
       }));
+      currentCurrency.value = currency;
 
       return
     }
+
+    loading.value = true;
 
     try {
       const response = await fetchExchangeRate(currency, Object.values(Currency).filter(item => item !== currency).join(','));
@@ -141,9 +144,12 @@ export default defineStore('store', (): Store => {
         ...item,
         convertedPrice: (item.price / response.rates.RUB).toFixed(2),
       }))
+      currentCurrency.value = currency;
     } catch (error) {
       console.error(error);
     }
+
+    loading.value = false;
   }
 
   const cardPositions = ref<Record<string, StockCount | undefined>>({});
@@ -188,6 +194,7 @@ export default defineStore('store', (): Store => {
     countPages: readonly(countPages),
     countAllItems: readonly(countAllItems),
     currentCurrency: readonly(currentCurrency),
+    loading: readonly(loading),
     itemsForCurrentPage,
     stockByArt,
     updateFilter,

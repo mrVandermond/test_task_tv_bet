@@ -52,9 +52,6 @@ import type { GroupButton } from '@/components/BaseGroupButton/types';
 
 const store = useStore();
 
-const isFilledFilter = computed(() => {
-  return Object.values(store.filter).filter(item => typeof item !== 'undefined');
-});
 const currencyButtons = [
   {
     key: Symbol('key'),
@@ -85,6 +82,10 @@ const selectOptions = [
     label: 'Price (Highest to Lowest)',
   },
 ];
+
+const isFilledFilter = computed(() => {
+  return Object.values(store.filter).filter(item => typeof item !== 'undefined');
+});
 
 function onChangeSortOrder(option: Option<SortOrder>): void {
   store.updateSortOrder(option.value);
