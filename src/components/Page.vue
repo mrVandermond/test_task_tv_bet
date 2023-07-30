@@ -1,5 +1,17 @@
 <template>
   <main class="page">
+    <section class="page__header">
+      <span class="page__all-count">{{ store.countAllItems }} results</span>
+
+      <BaseGroupButton :button-list="currencyButtons" />
+
+      <BaseSelect
+        :options="selectOptions"
+        class="page__sort-order"
+        @change="onChangeSortOrder"
+      />
+    </section>
+
     <section v-if="store.itemsForCurrentPage.length">
       <Card
         v-for="catalogItem in store.itemsForCurrentPage"
@@ -28,12 +40,50 @@ import useStore from '@/store';
 import Card from '@/components/Card.vue';
 import Pagination from '@/components/Pagination.vue';
 import { computed } from 'vue';
+import BaseGroupButton from '@/components/BaseGroupButton/BaseGroupButton.vue';
+import BaseSelect from '@/components/BaseSelect/BaseSelect.vue';
+import { SortOrder } from '@/store/types';
+import type { Option } from '@/components/BaseSelect/types';
 
 const store = useStore();
 
 const isFilledFilter = computed(() => {
   return Object.values(store.filter).filter(item => typeof item !== 'undefined');
 });
+const currencyButtons = [
+  {
+    key: Symbol('key'),
+    title: 'RUB',
+    active: true,
+  },
+  {
+    key: Symbol('key'),
+    title: 'USD',
+    active: false,
+  },
+]
+const selectOptions = [
+  {
+    value: SortOrder.TITLE_ASC,
+    label: 'Title (A to Z)',
+  },
+  {
+    value: SortOrder.TITLE_DESC,
+    label: 'Title (Z to A)',
+  },
+  {
+    value: SortOrder.PRICE_ASC,
+    label: 'Price (Lowest to Highest)',
+  },
+  {
+    value: SortOrder.PRICE_DESC,
+    label: 'Price (Highest to Lowest)',
+  },
+];
+
+function onChangeSortOrder(option: Option<SortOrder>): void {
+  store.updateSortOrder(option.value);
+}
 </script>
 
 <style scoped lang="sass">
@@ -50,4 +100,17 @@ const isFilledFilter = computed(() => {
   &__empty-text
     text-align: center
     padding: 16px 0
+
+  &__header
+    display: grid
+    justify-items: center
+    align-items: center
+    margin-bottom: 16px
+    grid-template-columns: 1fr 1fr 1fr
+
+  &__all-count
+    justify-self: start
+
+  &__sort-order
+    justify-self: end
 </style>

@@ -33,3 +33,10 @@ export interface StockCount {
   [Stock.STOCK_1]: number;
   [Stock.STOCK_2]: number;
 }
+
+export enum SortOrder {
+  TITLE_ASC,
+  TITLE_DESC,
+  PRICE_ASC,
+  PRICE_DESC,
+}
