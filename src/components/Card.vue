@@ -6,7 +6,7 @@
     </section>
 
     <section class="card__content">
-      <div>Price: {{ props.card.price }}</div>
+      <div>Price: {{ props.card.convertedPrice }} {{ currentCurrencySymbol }}</div>
       <div>Year: {{ props.card.year }}</div>
       <div>Stock: {{ stockCount }}</div>
     </section>
@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import type { ExtendedCatalogItem } from '@/store/types'
-import { Stock } from '@/store/types'
+import { Currency, Stock } from '@/store/types'
 import BaseButton from '@/components/BaseButton.vue'
 import { computed } from 'vue'
 import useStore from '@/store'
@@ -31,6 +31,12 @@ const store = useStore()
 
 const stockCount = computed(() => {
   return props.card.stockCount.value[Stock.STOCK_1] + props.card.stockCount.value[Stock.STOCK_2]
+});
+const currentCurrencySymbol = computed(() => {
+  if (store.currentCurrency === Currency.RUB) return '₽';
+  if (store.currentCurrency === Currency.USD) return '$';
+
+  return '';
 });
 
 function onClickAddToCard() {

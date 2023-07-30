@@ -3,7 +3,11 @@
     <section class="page__header">
       <span class="page__all-count">{{ store.countAllItems }} results</span>
 
-      <BaseGroupButton :button-list="currencyButtons" />
+      <BaseGroupButton
+        :button-list="currencyButtons"
+        :can-deactivate="false"
+        @click="onClickCurrencyButton"
+      />
 
       <BaseSelect
         :options="selectOptions"
@@ -42,8 +46,9 @@ import Pagination from '@/components/Pagination.vue';
 import { computed } from 'vue';
 import BaseGroupButton from '@/components/BaseGroupButton/BaseGroupButton.vue';
 import BaseSelect from '@/components/BaseSelect/BaseSelect.vue';
-import { SortOrder } from '@/store/types';
+import { Currency, SortOrder } from '@/store/types';
 import type { Option } from '@/components/BaseSelect/types';
+import type { GroupButton } from '@/components/BaseGroupButton/types';
 
 const store = useStore();
 
@@ -83,6 +88,10 @@ const selectOptions = [
 
 function onChangeSortOrder(option: Option<SortOrder>): void {
   store.updateSortOrder(option.value);
+}
+
+function onClickCurrencyButton(button: GroupButton): void {
+  void store.updateCurrency(button.title as Currency);
 }
 </script>
 

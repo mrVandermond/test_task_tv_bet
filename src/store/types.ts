@@ -11,6 +11,7 @@ export interface CatalogItem {
 export interface ExtendedCatalogItem extends CatalogItem {
   readonly key: symbol;
   stockCount: Ref<StockCount>;
+  convertedPrice: string;
 }
 
 export interface BrandItem {
@@ -39,4 +40,9 @@ export enum SortOrder {
   TITLE_DESC,
   PRICE_ASC,
   PRICE_DESC,
+}
+
+export enum Currency {
+  RUB = 'RUB',
+  USD = 'USD',
 }

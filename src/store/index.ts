@@ -5,23 +5,26 @@ import initialBrands from '@/data/brands.json'
 import initialCatalog from '@/data/catalog.json'
 import initialStock from '@/data/stock.json'
 import type { BrandItem, ExtendedCatalogItem, StockCount } from '@/store/types'
-import { SortOrder, Stock } from '@/store/types'
+import { Currency, SortOrder, Stock } from '@/store/types'
 import { COUNT_ITEM_PER_PAGE } from '@/utils/constants'
 import { convertStockToStockByArt, getCountPages } from '@/utils/functions'
+import { fetchExchangeRate } from '@/api'
 
 interface Store {
-  brands: BrandItem[];
-  yearsOfIssue: number[];
-  page: Ref<number>;
-  countPages: Readonly<Ref<number>>;
-  countAllItems: Readonly<Ref<number>>;
-  itemsForCurrentPage: ComputedRef<ExtendedCatalogItem[]>;
-  stockByArt: Record<string, Ref<StockCount>>;
-  filter: Readonly<Ref<Filter>>;
-  cardPositions: Ref<Record<string, StockCount | undefined>>;
-  updateFilter: (filter: Filter) => void;
-  addToCard: (art: string) => void;
-  updateSortOrder: (sortOrder: SortOrder) => void;
+  brands: BrandItem[]
+  yearsOfIssue: number[]
+  page: Ref<number>
+  countPages: Readonly<Ref<number>>
+  countAllItems: Readonly<Ref<number>>
+  currentCurrency: Readonly<Ref<Currency>>
+  itemsForCurrentPage: ComputedRef<ExtendedCatalogItem[]>
+  stockByArt: Record<string, Ref<StockCount>>
+  filter: Readonly<Ref<Filter>>
+  cardPositions: Ref<Record<string, StockCount | undefined>>
+  updateFilter: (filter: Filter) => void
+  addToCard: (art: string) => void
+  updateSortOrder: (sortOrder: SortOrder) => void
+  updateCurrency: (currency: Currency) => Promise<void>
 }
 
 interface Filter {
@@ -39,9 +42,11 @@ export default defineStore('store', (): Store => {
     yearOfIssue: undefined,
   });
   let stockByArt = convertStockToStockByArt(initialStock);
+  const currentCurrency = ref(Currency.RUB);
 
   const catalog = initialCatalog.map(item => ({
     ...item,
+    convertedPrice: item.price.toFixed(2),
     key: Symbol('key'),
   }));
   const filteredCatalog = ref(catalog);
@@ -62,8 +67,6 @@ export default defineStore('store', (): Store => {
         }
       });
   });
-
-  updateSortOrder(SortOrder.TITLE_ASC);
 
   function updateFilter(newFilterValue: Filter) {
     stockByArt = convertStockToStockByArt(initialStock, newFilterValue.stock, unref(cardPositions));
@@ -119,6 +122,30 @@ export default defineStore('store', (): Store => {
     });
   }
 
+  async function updateCurrency(currency: Currency): Promise<void> {
+    currentCurrency.value = currency;
+
+    if (currency === Currency.RUB) {
+      filteredCatalog.value = filteredCatalog.value.map(item => ({
+        ...item,
+        convertedPrice: item.price.toFixed(2),
+      }));
+
+      return
+    }
+
+    try {
+      const response = await fetchExchangeRate(currency, Object.values(Currency).filter(item => item !== currency).join(','));
+
+      filteredCatalog.value = filteredCatalog.value.map(item => ({
+        ...item,
+        convertedPrice: (item.price / response.rates.RUB).toFixed(2),
+      }))
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   const cardPositions = ref<Record<string, StockCount | undefined>>({});
   function updateCardPosition(art: string, stock: Stock): void {
     if (!cardPositions.value[art]) {
@@ -160,10 +187,12 @@ export default defineStore('store', (): Store => {
     page,
     countPages: readonly(countPages),
     countAllItems: readonly(countAllItems),
+    currentCurrency: readonly(currentCurrency),
     itemsForCurrentPage,
     stockByArt,
     updateFilter,
     updateSortOrder,
+    updateCurrency,
     addToCard,
   };
 });

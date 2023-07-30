@@ -28,10 +28,12 @@ const props = withDefaults(
     buttonList: T[];
     direction?: 'horizontal' | 'vertical';
     color?: 'primary' | 'secondary';
+    canDeactivate?: boolean;
   }>(),
   {
     direction: 'horizontal',
     color: 'primary',
+    canDeactivate: true,
   },
 );
 const emits = defineEmits<{
@@ -45,6 +47,8 @@ watchEffect(() => {
 });
 
 function onClickButton(button: T): void {
+  if (button.active && !props.canDeactivate) return;
+
   localButtonList.value = localButtonList.value.map(item => ({
     ...item,
     active: item.active ? !item.active : item.key === button.key,
