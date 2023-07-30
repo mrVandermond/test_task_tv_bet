@@ -28,7 +28,7 @@ interface Filter {
 
 export default defineStore('store', (): Store => {
   const brands = initialBrands;
-  const yearsOfIssue = [...new Set(initialCatalog.map(item => item.year)).values()];
+  const yearsOfIssue = [...new Set(initialCatalog.map(item => item.year)).values()].sort((a, b) => b - a);
   const catalog = ref(initialCatalog.map(item => ({
     ...item,
     key: Symbol('key'),

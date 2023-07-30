@@ -118,7 +118,7 @@ function onClickStock(button: StockButton): void {
   cursor: pointer
 
 .filter__block
-  padding: 8px 0
+  padding: 12px 0
   border-bottom: 1px solid $dark-gray-color
 
 .filter__group-button
