@@ -14,7 +14,7 @@
       >{{ '<' }}</BaseButton>
     </div>
 
-    <div>{{ store.page }} of {{ store.countPages }}</div>
+    <div>{{ page }} of {{ props.countPages }}</div>
 
     <div>
       <BaseButton
@@ -34,33 +34,55 @@
 
 <script setup lang="ts">
 import BaseButton from '@/components/BaseButton.vue';
-import useStore from '@/store';
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, ref, watchEffect } from 'vue';
 
-const store = useStore();
+const props = defineProps<{
+  page: number;
+  countPages: number;
+}>();
 
-const isFirstPage = computed(() => store.page === 1);
-const isLastPage = computed(() => store.page === store.countPages);
+const emits = defineEmits<{
+  (e: 'update:page', page: number): void;
+}>();
+
+const page = ref(1);
+const isFirstPage = computed(() => page.value === 1);
+const isLastPage = computed(() => page.value === props.countPages);
+
+const stopWatchPage = watchEffect(() => {
+  if (props.page === page.value) return;
+
+  page.value = props.page;
+});
+
+function updatePage(newPage: number) {
+  page.value = newPage;
+  emits('update:page', newPage);
+}
 
 function goToLast() {
-  store.page = store.countPages;
+  updatePage(props.countPages);
 }
 
 function goToNext() {
   if (isLastPage.value) return;
 
-  store.page += 1;
+  updatePage(page.value + 1);
 }
 
 function goToPrev() {
   if (isFirstPage.value) return;
 
-  store.page -= 1;
+  updatePage(page.value - 1);
 }
 
 function goToFirst() {
-  store.page = 1;
+  updatePage(1);
 }
+
+onBeforeUnmount(() => {
+  stopWatchPage();
+});
 </script>
 
 <style scoped lang="sass">

@@ -24,7 +24,11 @@
         class="page__card"
       />
 
-      <Pagination class="page__pagination" />
+      <Pagination
+        v-model:page="store.page"
+        :count-pages="store.countPages"
+        class="page__pagination"
+      />
     </section>
 
     <p

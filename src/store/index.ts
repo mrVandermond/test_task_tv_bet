@@ -7,7 +7,7 @@ import initialStock from '@/data/stock.json'
 import type { BrandItem, ExtendedCatalogItem, StockCount } from '@/store/types'
 import { Currency, SortOrder, Stock } from '@/store/types'
 import { COUNT_ITEM_PER_PAGE } from '@/utils/constants'
-import { convertStockToStockByArt, getCountPages } from '@/utils/functions'
+import { convertStockToStockByArt, getCountPages, sort } from '@/utils/functions'
 import { fetchExchangeRate } from '@/api'
 
 interface Store {
@@ -25,7 +25,7 @@ interface Store {
   addToCard: (art: string) => void
   updateSortOrder: (sortOrder: SortOrder) => void
   updateCurrency: (currency: Currency) => Promise<void>
-  loading: Readonly<Ref<boolean>>;
+  loading: Readonly<Ref<boolean>>
 }
 
 interface Filter {
@@ -35,27 +35,31 @@ interface Filter {
 }
 
 export default defineStore('store', (): Store => {
-  const yearsOfIssue = [...new Set(initialCatalog.map(item => item.year)).values()].sort((a, b) => b - a);
-
-  const filter = ref<Filter>({
-    brand: undefined,
-    stock: undefined,
-    yearOfIssue: undefined,
-  });
-  let stockByArt = convertStockToStockByArt(initialStock);
-  const currentCurrency = ref(Currency.RUB);
-  const loading = ref(false);
-
+  const yearsOfIssue = [...new Set(initialCatalog.map(item => item.year)).values()]
+    .sort((a, b) => b - a);
   const catalog = initialCatalog.map(item => ({
     ...item,
     convertedPrice: item.price.toFixed(2),
     key: Symbol('key'),
   }));
-  const filteredCatalog = ref(catalog);
+  let stockByArt = convertStockToStockByArt(initialStock);
+  let sortFunction = sort(SortOrder.TITLE_ASC);
+
+  const loading = ref(false);
+  const filter = ref<Filter>({
+    brand: undefined,
+    stock: undefined,
+    yearOfIssue: undefined,
+  });
+  const currentCurrency = ref(Currency.RUB);
+  const exchangeCurrencyRate = ref(1);
+  const filteredCatalog = ref<Omit<ExtendedCatalogItem, 'stockCount'>[]>(catalog);
+  const cardPositions = ref<Record<string, StockCount | undefined>>({});
 
   const page = ref(1);
   const countPages = ref(getCountPages(catalog.length, COUNT_ITEM_PER_PAGE));
   const countAllItems = ref(catalog.length);
+
   const itemsForCurrentPage = computed(() => {
     const start = (page.value - 1) * COUNT_ITEM_PER_PAGE;
     const end = page.value * COUNT_ITEM_PER_PAGE;
@@ -66,7 +70,8 @@ export default defineStore('store', (): Store => {
         return {
           ...item,
           stockCount: stockByArt[item.art],
-        }
+          convertedPrice: (item.price / exchangeCurrencyRate.value).toFixed(2),
+        };
       });
   });
 
@@ -74,7 +79,7 @@ export default defineStore('store', (): Store => {
     stockByArt = convertStockToStockByArt(initialStock, newFilterValue.stock, unref(cardPositions));
     page.value = 1;
     filter.value = newFilterValue;
-    filteredCatalog.value = catalog.filter((item) => {
+    filteredCatalog.value = [...catalog].sort(sortFunction).filter((item) => {
       let isValidBrand = true;
       let isValidStock = true;
       let isValidYear = true;
@@ -103,33 +108,13 @@ export default defineStore('store', (): Store => {
 
   function updateSortOrder(sortOrder: SortOrder) {
     page.value = 1;
-    filteredCatalog.value = filteredCatalog.value.sort((a, b) => {
-      if (sortOrder === SortOrder.TITLE_ASC) {
-        return a.name < b.name ? 1 : -1;
-      }
-
-      if (sortOrder === SortOrder.TITLE_DESC) {
-        return a.name > b.name ? 1 : -1;
-      }
-
-      if (sortOrder === SortOrder.PRICE_ASC) {
-        return a.price - b.price;
-      }
-
-      if (sortOrder === SortOrder.PRICE_DESC) {
-        return b.price - a.price;
-      }
-
-      return 0;
-    });
+    sortFunction = sort(sortOrder);
+    filteredCatalog.value = filteredCatalog.value.sort(sortFunction);
   }
 
   async function updateCurrency(currency: Currency): Promise<void> {
     if (currency === Currency.RUB) {
-      filteredCatalog.value = filteredCatalog.value.map(item => ({
-        ...item,
-        convertedPrice: item.price.toFixed(2),
-      }));
+      exchangeCurrencyRate.value = 1;
       currentCurrency.value = currency;
 
       return
@@ -140,10 +125,7 @@ export default defineStore('store', (): Store => {
     try {
       const response = await fetchExchangeRate(currency, Object.values(Currency).filter(item => item !== currency).join(','));
 
-      filteredCatalog.value = filteredCatalog.value.map(item => ({
-        ...item,
-        convertedPrice: (item.price / response.rates.RUB).toFixed(2),
-      }))
+      exchangeCurrencyRate.value = response.rates.RUB;
       currentCurrency.value = currency;
     } catch (error) {
       console.error(error);
@@ -152,7 +134,6 @@ export default defineStore('store', (): Store => {
     loading.value = false;
   }
 
-  const cardPositions = ref<Record<string, StockCount | undefined>>({});
   function updateCardPosition(art: string, stock: Stock): void {
     if (!cardPositions.value[art]) {
       cardPositions.value[art] = {
